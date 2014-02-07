@@ -15,35 +15,28 @@ def getLoadingBar(ln, procent=100, bracket="[]", fillch="#", emptych="-"):
     return "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(sumln-filled), bracket[1])
 
 def getNewPath(url, name=None, folderpath=None):
-    if folderpath==None: folderpath=os.curdir
-    else: folderpath = folderpath.rstrip(os.sep)
-    if not os.path.exists(folderpath): os.makedirs(folderpath)
-    if name==None:
-        path="%s%s%s" % (folderpath, os.sep, url.split("/")[-1])
+    if not name: name = url.split("/")[-1] #if name is empty  
+    if folderpath: 
+        folderpath = folderpath.rstrip(os.sep)
+        os.makedirs(folderpath)
     else:
-        path="%s%s%s" % (folderpath, os.sep, name)
-    return path
+        folderpath=os.curdir
+    return "%s%s%s" % (folderpath, os.sep, name)
 
 def downloadfile(url, newName=None, folderpath=None):
     newPath = getNewPath(url, newName, folderpath)
-    
-    if not os.path.exists(newPath): localLen = 0
-    else: localLen = os.path.getsize(newPath)
-        
-    req = urllib2.Request(url)
-    req.headers['Range'] = 'bytes='+str(localLen)+'-'
     
     print "Sending request..."
     remoteLen = 0
     try:
         res = urllib2.urlopen(url)
         remoteLen = int(res.info().getheader("Content-Length"))
-    except urllib2.HTTPError, e:
+    except (urllib2.HTTPError, urllib2.URLError), e:
         print e
+        print "Download aborted"
         return
-    except urllib2.URLError, e:
-        print e
-        return
+    except TypeError:
+        remoteLem = 0
         
     print "Received code:", res.getcode()
 
@@ -53,7 +46,9 @@ def downloadfile(url, newName=None, folderpath=None):
         res.info().getheader("Content-Type"))
     
     print "Saving to:", newPath
-        
+    
+    if not os.path.exists(newPath): localLen = 0
+    else: localLen = os.path.getsize(newPath)    
     if localLen == 0:
         localFile = open(newPath, "wb")
     elif localLen < remoteLen:
@@ -62,6 +57,8 @@ def downloadfile(url, newName=None, folderpath=None):
         print "File has downloaded already.\n"
         return
 
+    req = urllib2.Request(url)
+    req.headers['Range'] = 'bytes='+str(localLen)+'-'
     try:
         remoteFile = urllib2.urlopen(req)
     except urllib2.HTTPError, e:
@@ -73,8 +70,7 @@ def downloadfile(url, newName=None, folderpath=None):
         
     cols = getConsoleWeight()
     print "Downloading: %s" % remoteFile.url
-    #maybe not raise and just return
-    if remoteLen == 0: raise urllib2.HTTPError("Content-Length is 0")
+    if remoteLen == 0: return #+print that nothing to download
     remoteLen = float(remoteLen)
     bytesRead = float(localLen)
     t = time.time()
