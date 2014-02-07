@@ -61,10 +61,7 @@ def downloadfile(url, newName=None, folderpath=None):
     req.headers['Range'] = 'bytes='+str(localLen)+'-'
     try:
         remoteFile = urllib2.urlopen(req)
-    except urllib2.HTTPError, e:
-        print e
-        return
-    except urllib2.URLError, e:
+    except (urllib2.HTTPError, urllib2.URLError), e:
         print e
         return
         
