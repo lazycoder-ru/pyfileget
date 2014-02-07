@@ -3,10 +3,12 @@
 
 # Just for test file download module
 
+import os
 from filedownload import downloadfile
 
 def main():
-	downloadfile("http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso", folderpath="/home/")
+	home = os.path.expanduser("~")
+	downloadfile("http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso", folderpath=home)
 	
 	return 0
 

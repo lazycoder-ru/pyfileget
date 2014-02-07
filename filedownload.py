@@ -17,6 +17,7 @@ def getLoadingBar(ln, procent=100, bracket="[]", fillch="#", emptych="-"):
 
 def getNewPath(url, name=None, folderpath=None):
     if folderpath==None: folderpath=os.curdir
+    else: folderpath = folderpath.rstrip(os.sep)
     if not os.path.exists(folderpath): os.makedirs(folderpath)
     if name==None:
         path="%s%s%s" % (
