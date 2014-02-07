@@ -16,7 +16,6 @@ def getLoadingBar(ln, procent=100, bracket="[]", fillch="#", emptych="-"):
 
 def getNewPath(url, name=None, folderpath=None):
     if not name: name = url.split("/")[-1] #if name is empty  
-    print folderpath
     if folderpath: 
         folderpath = folderpath.rstrip(os.sep)
         if not os.path.exists(folderpath): os.makedirs(folderpath)
