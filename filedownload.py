@@ -15,24 +15,24 @@ def getLoadingBar(ln, procent=100, bracket="[]", fillch="#", emptych="-"):
     bar = "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(sumln-filled), bracket[1])
     return bar
 
-def getNewPath(url, name=None, directory=None):
-    if directory==None: directory=os.curdir
-    if not os.path.exists(directory): os.makedirs(directory)
+def getNewPath(url, name=None, folderpath=None):
+    if folderpath==None: folderpath=os.curdir
+    if not os.path.exists(folderpath): os.makedirs(folderpath)
     if name==None:
         path="%s%s%s" % (
-            directory,
+            folderpath,
             os.sep,
             url.split("/")[-1])
     else:
         path="%s%s%s" % (
-            directory,
+            folderpath,
             os.sep,
             name)
     return path
 
-def downloadfile(url, newName=None, dir=None):
+def downloadfile(url, newName=None, folderpath=None):
     cols = getConsoleWeight()
-    newPath = getNewPath(url, newName, dir)
+    newPath = getNewPath(url, newName, folderpath)
     
     if not os.path.exists(newPath):
         localLen = 0
