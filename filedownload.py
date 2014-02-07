@@ -89,11 +89,11 @@ def downloadfile(url, newName=None, folderpath=None):
         rm = bytesRead
         speed = 0.0
         for line in remoteFile:
+            bytesRead += len(line)
             if time.time()-t >= 1.0:
-                t = time.time()
                 speed = (bytesRead-rm)/1024.0
                 rm = bytesRead
-            bytesRead += len(line)
+                t = time.time()
             percent = 100*bytesRead/remoteLen
             curInfo = "\rProgress: %.02f/%.02f kb (%d%%) %.02f kb/s" % (
                 bytesRead/1024.0,
