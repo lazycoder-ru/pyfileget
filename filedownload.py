@@ -15,7 +15,7 @@ def getLoadingBar(ln, procent=100, bracket="[]", fillch="#", emptych="-"):
     return "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(sumln-filled), bracket[1])
 
 def getNewPath(url, name=None, folderpath=None):
-    if name: name = url.split("/")[-1] #if name is empty  
+    if not name: name = url.split("/")[-1] #if name is empty  
     if folderpath: 
         folderpath = folderpath.rstrip(os.sep)
         if not os.path.exists(folderpath): os.makedirs(folderpath)
@@ -25,7 +25,7 @@ def getNewPath(url, name=None, folderpath=None):
 
 def downloadfile(url, newName=None, folderpath=None):
     newPath = getNewPath(url, newName, folderpath)
-    
+    print newPath
     print "Sending request..."
     remoteLen = 0
     try:
