@@ -20,22 +20,22 @@ def getNewPath(url, name=None, folderpath=None):
         folderpath = folderpath.rstrip(os.sep)
         if not os.path.exists(folderpath): os.makedirs(folderpath)
     else:
-        folderpath=os.curdir
+        folderpath=os.path.getcwd() # from curdir to absolute path
     return "%s%s%s" % (folderpath, os.sep, name)
 
 def downloadfile(url, newName=None, folderpath=None):
-    newPath = getNewPath(url, newName, folderpath)
     print "Sending request..."
-    remoteLen = 0
     try:
         res = urllib2.urlopen(url)
         remoteLen = int(res.info().getheader("Content-Length"))
     except (urllib2.HTTPError, urllib2.URLError), e:
         print e
-        print "Download aborted"
+        print "Download aborted.\n"
         return
     except TypeError:
-        remoteLem = 0
+        #TODO: download web pages (they have None in Length)
+        print "Content-Length is None. Nothing to download.\n"
+        return
         
     print "Received code:", res.getcode()
 
@@ -44,17 +44,18 @@ def downloadfile(url, newName=None, folderpath=None):
         remoteLen/1024.0/1024.0,
         res.info().getheader("Content-Type"))
     
+    newPath = getNewPath(url, newName, folderpath)
     print "Saving to:", newPath
     
-    if not os.path.exists(newPath): localLen = 0
-    else: localLen = os.path.getsize(newPath)    
-    if localLen == 0:
-        localFile = open(newPath, "wb")
-    elif localLen < remoteLen:
+    if os.path.exists(newPath): 
+        localLen = os.path.getsize(newPath)  
+        if localLen == remoteLen:
+            print "File has downloaded already.\n"
+            return
         localFile = open(newPath, "ab")
-    elif localLen == remoteLen:
-        print "File has downloaded already.\n"
-        return
+    else: 
+        localLen = 0
+        localFile = open(newPath, "wb")
 
     req = urllib2.Request(url)
     req.headers['Range'] = 'bytes='+str(localLen)+'-'
@@ -66,7 +67,6 @@ def downloadfile(url, newName=None, folderpath=None):
         
     cols = getConsoleWeight()
     print "Downloading: %s" % remoteFile.url
-    if remoteLen == 0: return #+print that nothing to download
     remoteLen = float(remoteLen)
     bytesRead = float(localLen)
     t = time.time()
