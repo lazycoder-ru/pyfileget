@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 import os,sys,urllib2,platform,time
+import pynetspeed
 
 def getConsoleWidth():
     columns = 80 #for windows and others
@@ -80,16 +81,10 @@ def downloadfile(url, newName=None, folderpath=None):
     print "Downloading: %s" % remoteFile.url
     remoteLen = float(remoteLen)
     bytesRead = float(localLen)
-    t = time.time()
-    rm = bytesRead
-    speed = 0.0
+    pynetspeed.initMeter(bytesRead)
     for line in remoteFile:
         bytesRead += len(line)
-        if time.time()-t >= 1.0:
-            speed = (bytesRead-rm)/1024.0
-            rm = bytesRead
-            t = time.time()
-        displayDownloadInfo(bytesRead, remoteLen, speed, cols)
+        displayDownloadInfo(bytesRead, remoteLen, pynetspeed.getNetSpeed(bytesRead), cols)
         localFile.write(line)
     remoteFile.close()
     localFile.close()
