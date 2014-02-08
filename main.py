@@ -8,8 +8,7 @@ from filedownload import downloadfile
 
 def main():
 	home = os.path.expanduser("~")
-	downloadfile("http://mirror.yandex.ru/ubuntu-releases/13.10", folderpath=home)
-	#ubuntu-13.10-desktop-i386.iso
+	downloadfile("http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso", folderpath=home)
 	
 	return 0
 

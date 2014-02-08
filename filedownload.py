@@ -3,7 +3,7 @@
 
 import os,sys,urllib2,platform,time
 
-def getConsoleWeight():
+def getConsoleWidth():
     columns = 80 #for windows and others
     if platform.system() == "Linux":
         columns = os.popen('stty size', 'r').read().split()[1]
@@ -22,6 +22,19 @@ def getNewPath(url, name=None, folderpath=None):
     else:
         folderpath=os.path.getcwd() # from curdir to absolute path
     return "%s%s%s" % (folderpath, os.sep, name)
+
+def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
+    #TODO: make templated output
+    percent = 100*bytesRead/remoteLen
+    curInfo = "\rProgress: %.02f/%.02f KB (%d%%) %.02f KB/s" % (
+        bytesRead/1024.0,
+        remoteLen/1024.0,
+        percent,
+        speed)
+    loadbar = getLoadingBar(conWidth-len(curInfo), percent)
+    curInfo = curInfo[:11] + loadbar + curInfo[10:] #after progress
+    sys.stdout.write(curInfo)
+    sys.stdout.flush()    
 
 def downloadfile(url, newName=None, folderpath=None):
     print "Sending request..."
@@ -65,7 +78,7 @@ def downloadfile(url, newName=None, folderpath=None):
         print e
         return
         
-    cols = getConsoleWeight()
+    cols = getConsoleWidth()
     print "Downloading: %s" % remoteFile.url
     remoteLen = float(remoteLen)
     bytesRead = float(localLen)
@@ -78,17 +91,7 @@ def downloadfile(url, newName=None, folderpath=None):
             speed = (bytesRead-rm)/1024.0
             rm = bytesRead
             t = time.time()
-        percent = 100*bytesRead/remoteLen
-        #TODO: make templated output
-        curInfo = "\rProgress: %.02f/%.02f KB (%d%%) %.02f KB/s" % (
-            bytesRead/1024.0,
-            remoteLen/1024.0,
-            percent,
-            speed)
-        loadbar = getLoadingBar(cols-len(curInfo), percent)
-        curInfo = curInfo[:11] + loadbar + curInfo[10:] #after progress
-        sys.stdout.write(curInfo)
-        sys.stdout.flush()
+        displayDownloadInfo(bytesRead, remoteLen, speed, cols)
         localFile.write(line)
     remoteFile.close()
     localFile.close()
