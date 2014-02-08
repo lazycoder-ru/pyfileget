@@ -51,12 +51,10 @@ def downloadfile(url, newName=None, folderpath=None):
         return
         
     print "Received code:", res.getcode()
-
     print "Length: %d (%.02fM) [%s]" % (
         remoteLen,
         remoteLen/1024.0/1024.0,
         res.info().getheader("Content-Type"))
-    
     newPath = getNewPath(url, newName, folderpath)
     print "Saving to:", newPath
     
