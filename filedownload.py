@@ -25,7 +25,6 @@ def getNewPath(url, name=None, folderpath=None):
 
 def downloadfile(url, newName=None, folderpath=None):
     newPath = getNewPath(url, newName, folderpath)
-    print newPath
     print "Sending request..."
     remoteLen = 0
     try:
