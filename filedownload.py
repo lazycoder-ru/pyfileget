@@ -9,9 +9,9 @@ def getConsoleWeight():
         columns = os.popen('stty size', 'r').read().split()[1]
     return int(columns)
     
-def getLoadingBar(ln, procent=100, bracket="[]", fillch="#", emptych="-"):
+def getLoadingBar(ln, percent=100, bracket="[]", fillch="#", emptych="-"):
     sumln = ln-2 #2 brackets
-    filled = int(procent*sumln/100)
+    filled = int(percent*sumln/100)
     return "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(sumln-filled), bracket[1])
 
 def getNewPath(url, name=None, folderpath=None):
