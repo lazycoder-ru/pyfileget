@@ -18,14 +18,17 @@ def getLoadingBar(ln, percent=100, bracket="[]", fillch="#", emptych="-"):
     filled = int(percent*sumln/100)
     return "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(sumln-filled), bracket[1])
 
-def getNewPath(url, name=None, folderpath=None):
-    if not name: name = url.split("/")[-1] #if name is empty  
-    if folderpath: 
-        folderpath = folderpath.rstrip(os.sep)
-        if not os.path.exists(folderpath): os.makedirs(folderpath)
-    else:
-        folderpath=os.getcwd() # from curdir to absolute path
-    return "%s%s%s" % (folderpath, os.sep, name)
+def getNewPath(url, localpath=None):
+	filename = url.split("/")[-1]
+	folderpath = os.getcwd()
+	if localpath:
+		if os.path.isdir(localpath) or localpath[-1] == os.sep:
+			folderpath = os.path.abspath(localpath)
+		else:
+			filename = os.path.basename(localpath)
+			folderpath = os.path.abspath(os.path.dirname(localpath))
+		if not os.path.exists(folderpath): os.makedirs(folderpath)
+	return "%s%s%s" % (folderpath, os.sep, filename)
 
 def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
     #TODO: make templated output
@@ -40,7 +43,7 @@ def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
     sys.stdout.write(curInfo)
     sys.stdout.flush()    
 
-def downloadfile(url, newName=None, folderpath=None):
+def downloadfile(url, localpath=None):
     print "Sending request..."
     try:
         res = urllib2.urlopen(url)
@@ -50,7 +53,7 @@ def downloadfile(url, newName=None, folderpath=None):
         print "Download aborted.\n"
         return
     except TypeError:
-        #TODO: download web pages (they have None in Length)
+        #TODO: make ability to download web pages (they have None in Length)
         print "Content-Length is None. Nothing to download.\n"
         return
         
@@ -59,7 +62,8 @@ def downloadfile(url, newName=None, folderpath=None):
         remoteLen,
         remoteLen/1024.0/1024.0,
         res.info().getheader("Content-Type"))
-    newPath = getNewPath(url, newName, folderpath)
+    
+    newPath = getNewPath(url, localpath)
     print "Saving to:", newPath
     #TODO: add extension(.download) to downloading file
     if os.path.exists(newPath): 
