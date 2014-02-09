@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*- 
 
 import os,sys,urllib2,platform,time
-import pynetspeed
+from pynetspeed import NetSpeed
 
 APPENDMODE = "ab"
 REWRITEMODE = "wb"
@@ -90,10 +90,10 @@ def downloadfile(url, newName=None, folderpath=None):
     cols = getConsoleWidth()
     print "Downloading:", remoteFile.url
     bytesRead = float(localLen)
-    pynetspeed.initMeter(bytesRead)
+    speed = NetSpeed(bytesRead)
     for line in remoteFile:
         bytesRead += len(line)
-        displayDownloadInfo(bytesRead, remoteLen, pynetspeed.getNetSpeed(bytesRead), cols)
+        displayDownloadInfo(bytesRead, remoteLen, speed.get_speed(bytesRead), cols)
         localFile.write(line)
     remoteFile.close()
     localFile.close()

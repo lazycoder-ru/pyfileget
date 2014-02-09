@@ -3,20 +3,18 @@
 
 from time import time
 
-startTime = None
-bytesReaded = 0.0
-speed = 0.0
+class NetSpeed(object):
+	startTime = None
+	bytesReaded = 0.0
+	speed = 0.0	
 
-def initMeter(startSize=0.0):
-	global bytesReaded, startTime
-	startTime = time()
-	bytesReaded = startSize
-	
-def getNetSpeed(_bytesReaded):
-	global bytesReaded, startTime, speed
-	if time()-startTime >= 1.0:
-		startTime = time()
-		speed = (_bytesReaded-bytesReaded)/1024.0
-		bytesReaded = _bytesReaded
-	return speed
+	def __init__(self, bytesReaded):
+		self.bytesReaded = bytesReaded
+		self.startTime = time()
 
+	def get_speed(self, bytesReaded):
+		if time()-self.startTime >= 1.0:
+			self.startTime = time()
+			self.speed = (bytesReaded-self.bytesReaded)/1024.0
+			self.bytesReaded = bytesReaded
+		return self.speed
