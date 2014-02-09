@@ -27,7 +27,11 @@ def getNewPath(url, localpath=None):
 		else:
 			filename = os.path.basename(localpath)
 			folderpath = os.path.abspath(os.path.dirname(localpath))
-		if not os.path.exists(folderpath): os.makedirs(folderpath)
+		try:
+			if not os.path.exists(folderpath): os.makedirs(folderpath)
+		except (IOError, OSError), e:
+			folderpath = os.getcwd()
+            print e, "\nUsing working directory:", folderpath
 	return "%s%s%s" % (folderpath, os.sep, filename)
 
 def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
