@@ -10,7 +10,6 @@ speed = 0.0
 def initMeter(startSize=0.0):
 	global bytesReaded, startTime
 	startTime = time()
-	
 	bytesReaded = startSize
 	
 def getNetSpeed(_bytesReaded):

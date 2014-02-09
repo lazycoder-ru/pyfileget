@@ -4,6 +4,9 @@
 import os,sys,urllib2,platform,time
 import pynetspeed
 
+APPENDMODE = "ab"
+REWRITEMODE = "wb"
+
 def getConsoleWidth():
     columns = 80 #for windows and others
     if platform.system() == "Linux":
@@ -21,7 +24,7 @@ def getNewPath(url, name=None, folderpath=None):
         folderpath = folderpath.rstrip(os.sep)
         if not os.path.exists(folderpath): os.makedirs(folderpath)
     else:
-        folderpath=os.path.getcwd() # from curdir to absolute path
+        folderpath=os.getcwd() # from curdir to absolute path
     return "%s%s%s" % (folderpath, os.sep, name)
 
 def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
@@ -41,7 +44,7 @@ def downloadfile(url, newName=None, folderpath=None):
     print "Sending request..."
     try:
         res = urllib2.urlopen(url)
-        remoteLen = int(res.info().getheader("Content-Length"))
+        remoteLen = float(res.info().getheader("Content-Length"))
     except (urllib2.HTTPError, urllib2.URLError), e:
         print e
         print "Download aborted.\n"
@@ -60,14 +63,21 @@ def downloadfile(url, newName=None, folderpath=None):
     print "Saving to:", newPath
     
     if os.path.exists(newPath): 
-        localLen = os.path.getsize(newPath)  
+        localLen = int(os.path.getsize(newPath))  
         if localLen == remoteLen:
             print "File has downloaded already.\n"
             return
-        localFile = open(newPath, "ab")
+        mode = APPENDMODE
     else: 
         localLen = 0
-        localFile = open(newPath, "wb")
+        mode = REWRITEMODE
+
+    try:
+        localFile = open(newPath, mode)    
+    except (IOError, OSError), e:
+        print e
+        print "Download aborted.\n"
+        return
 
     req = urllib2.Request(url)
     req.headers['Range'] = 'bytes='+str(localLen)+'-'
@@ -78,8 +88,7 @@ def downloadfile(url, newName=None, folderpath=None):
         return
         
     cols = getConsoleWidth()
-    print "Downloading: %s" % remoteFile.url
-    remoteLen = float(remoteLen)
+    print "Downloading:", remoteFile.url
     bytesRead = float(localLen)
     pynetspeed.initMeter(bytesRead)
     for line in remoteFile:
