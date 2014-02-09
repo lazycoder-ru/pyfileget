@@ -6,15 +6,18 @@ from time import time
 class NetSpeed(object):
 	startTime = None
 	bytesReaded = 0.0
-	speed = 0.0	
+	speed = 0.0
+	measure = "KB"
+	measures = {"B":1, "KB":1024.0, "MB":1024.0*1024.0}
 
-	def __init__(self, bytesReaded):
+	def __init__(self, bytesReaded, measure="KB"):
 		self.bytesReaded = bytesReaded
+		self.measure = measure
 		self.startTime = time()
 
 	def get_speed(self, bytesReaded):
 		if time()-self.startTime >= 1.0:
 			self.startTime = time()
-			self.speed = (bytesReaded-self.bytesReaded)/1024.0
+			self.speed = (bytesReaded-self.bytesReaded)/self.measures[self.measure]
 			self.bytesReaded = bytesReaded
-		return self.speed
+		return "%.02f %s" % (self.speed, self.measure+"/s")

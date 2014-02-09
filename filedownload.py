@@ -30,7 +30,7 @@ def getNewPath(url, name=None, folderpath=None):
 def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
     #TODO: make templated output
     percent = 100*bytesRead/remoteLen
-    curInfo = "\rProgress: %.02f/%.02f KB (%d%%) %.02f KB/s" % (
+    curInfo = "\rProgress: %.02f/%.02f KB (%d%%) %s" % (
         bytesRead/1024.0,
         remoteLen/1024.0,
         percent,
