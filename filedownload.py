@@ -61,7 +61,7 @@ def downloadfile(url, newName=None, folderpath=None):
         res.info().getheader("Content-Type"))
     newPath = getNewPath(url, newName, folderpath)
     print "Saving to:", newPath
-    
+    #TODO: add extension(.download) to downloading file
     if os.path.exists(newPath): 
         localLen = int(os.path.getsize(newPath))  
         if localLen == remoteLen:
