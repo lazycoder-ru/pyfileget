@@ -30,8 +30,7 @@ def get_new_path(url, localpath=None):
         try:
             if not os.path.exists(folderpath): os.makedirs(folderpath)
         except (IOError, OSError), e:
-            folderpath = os.getcwd()
-            print e, "\nUsing working directory:", folderpath
+            raise DownloadError("Cant create folder(s).",e)
     return "%s%s%s" % (folderpath, os.sep, filename)
 
 def rename_downloaded(path):
@@ -40,8 +39,7 @@ def rename_downloaded(path):
     try:
         os.rename(path+DL_EXT, path)
     except (IOError, OSError), e:
-        print e
-        print "Error while renaming file. Renaming aborted."        
+        raise DownloadError("Error while renaming file.", e)
 
 def display_download_info(bytesRead=1, remoteLen=1, speed="", conWidth=80):
     #TODO: make templated output
@@ -59,7 +57,6 @@ def display_download_info(bytesRead=1, remoteLen=1, speed="", conWidth=80):
 def download(remoteFile, localFile, remoteLen, bytesReaded):
     cols = get_console_width()
     speed = NetSpeed(bytesReaded)
-    print "Downloading:", remoteFile.url
     try:
         for line in remoteFile:
             bytesReaded += len(line)
@@ -121,13 +118,14 @@ def download_file(url, localpath=None):
     if localLen == remoteLen:
         rename_downloaded(newPath)
         raise DownloadError("File %s has downloaded already." % newPath)
+    print "Downloading:", url    
     download(get_remote_file_handler(url, localLen),
              get_local_file_handler(newPath),
              float(remoteLen), float(localLen))
     rename_downloaded(newPath)
     return newPath
 
-def pyget(url, localpath):
+def pyget(url, localpath=None):
     try:
         newPath = download_file(url, localpath)
     except DownloadError, e:
