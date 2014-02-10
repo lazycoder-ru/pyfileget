@@ -56,6 +56,7 @@ def display_download_info(bytesRead, remoteLen, speed, conWidth):
     sys.stdout.flush()    
 
 def download_file(url, localpath=None):
+    #requesting file and getting length of remote file
     print "Sending request..."
     try:
         res = urllib2.urlopen(url)
@@ -68,15 +69,16 @@ def download_file(url, localpath=None):
         #TODO: make ability to download web pages (they have None in Length)
         print "Content-Length is None. Nothing to download.\n"
         return
-        
+    #print info
     print "Received code:", res.getcode()
     print "Length: %d (%.02fM) [%s]" % (
         remoteLen,
         remoteLen/1024.0/1024.0,
         res.info().getheader("Content-Type"))
-    
+    #getting local path
     newPath = get_new_path(url, localpath)
     print "Saving to:", newPath
+    #getting length of local file
     currentDlPath = newPath+DL_EXT
     if os.path.exists(currentDlPath):
         localLen = int(os.path.getsize(currentDlPath))
@@ -88,14 +90,14 @@ def download_file(url, localpath=None):
     else:
         localLen = 0
         mode = REWRITEMODE
-
+    #getting local file handle
     try:
         localFile = open(currentDlPath, mode)    
     except (IOError, OSError), e:
         print e
         print "Download aborted.\n"
         return
-
+    #getting remote file handle
     req = urllib2.Request(url)
     req.headers['Range'] = 'bytes='+str(localLen)+'-'
     try:
@@ -103,14 +105,14 @@ def download_file(url, localpath=None):
     except (urllib2.HTTPError, urllib2.URLError), e:
         print e
         return
-        
+    #downloading
     cols = get_console_width()
     print "Downloading:", remoteFile.url
-    bytesRead = float(localLen)
-    speed = NetSpeed(bytesRead)
+    bytesReaded = float(localLen)
+    speed = NetSpeed(bytesReaded)
     for line in remoteFile:
-        bytesRead += len(line)
-        display_download_info(bytesRead, remoteLen, speed.get_speed(bytesRead), cols)
+        bytesReaded += len(line)
+        display_download_info(bytesReaded, remoteLen, speed.get_speed(bytesReaded), cols)
         localFile.write(line)
     remoteFile.close()
     localFile.close()
