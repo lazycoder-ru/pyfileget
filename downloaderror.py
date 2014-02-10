@@ -3,7 +3,7 @@
 
 class DownloadError(Exception):
 	def __init__(self, value, systemErrorValue=""):
-		self.systemErrorValue = repr(systemErrorValue)
+		self.systemErrorValue = systemErrorValue
 		self.value = value
 		
 	def __str__(self):

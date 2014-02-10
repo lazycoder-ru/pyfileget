@@ -35,6 +35,8 @@ def get_new_path(url, localpath=None):
     return "%s%s%s" % (folderpath, os.sep, filename)
 
 def rename_downloaded(path):
+    if os.path.exists(path):
+        raise DownloadError("File %s exists." % path)    
     try:
         os.rename(path+DL_EXT, path)
     except (IOError, OSError), e:
@@ -115,8 +117,6 @@ def download_file(url, localpath=None):
     #getting local path
     newPath = get_new_path(url, localpath)
     print "Saving to:", newPath
-    if os.path.exists(newPath):
-        raise DownloadError("File %s exists." % newPath)
     localLen = get_local_file_length(newPath)
     if localLen == remoteLen:
         rename_downloaded(newPath)
