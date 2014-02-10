@@ -55,6 +55,15 @@ def display_download_info(bytesRead, remoteLen, speed, conWidth):
     sys.stdout.write(curInfo)
     sys.stdout.flush()    
 
+def get_open_mode(path, remoteLen):
+    #getting length of local file
+    currentDlPath = path+DL_EXT
+    if os.path.exists(currentDlPath):
+        localLen = int(os.path.getsize(currentDlPath))
+        return (localLen, APPENDMODE)
+    else:
+        return (0, REWRITEMODE)
+
 def download_file(url, localpath=None):
     #requesting file and getting length of remote file
     print "Sending request..."
@@ -78,18 +87,11 @@ def download_file(url, localpath=None):
     #getting local path
     newPath = get_new_path(url, localpath)
     print "Saving to:", newPath
-    #getting length of local file
-    currentDlPath = newPath+DL_EXT
-    if os.path.exists(currentDlPath):
-        localLen = int(os.path.getsize(currentDlPath))
-        if localLen == remoteLen:
-            print "File has downloaded already.\n"
-            rename_downloaded(newPath)
-            return
-        mode = APPENDMODE
-    else:
-        localLen = 0
-        mode = REWRITEMODE
+    localLen, mode = get_open_mode(newPath, remoteLen)
+    if localLen == remoteLen:
+        print "File has downloaded already.\n"
+        rename_downloaded(path)
+        return
     #getting local file handle
     try:
         localFile = open(currentDlPath, mode)    
