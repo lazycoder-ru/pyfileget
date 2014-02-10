@@ -6,6 +6,7 @@ from pynetspeed import NetSpeed
 
 APPENDMODE = "ab"
 REWRITEMODE = "wb"
+DL_EXT = ".download"
 
 def getConsoleWidth():
     columns = 80 #for windows and others
@@ -19,20 +20,27 @@ def getLoadingBar(ln, percent=100, bracket="[]", fillch="#", emptych="-"):
     return "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(sumln-filled), bracket[1])
 
 def getNewPath(url, localpath=None):
-	filename = url.split("/")[-1]
-	folderpath = os.getcwd()
-	if localpath:
-		if os.path.isdir(localpath) or localpath[-1] == os.sep:
-			folderpath = os.path.abspath(localpath)
-		else:
-			filename = os.path.basename(localpath)
-			folderpath = os.path.abspath(os.path.dirname(localpath))
-		try:
-			if not os.path.exists(folderpath): os.makedirs(folderpath)
-		except (IOError, OSError), e:
-			folderpath = os.getcwd()
+    filename = url.split("/")[-1]
+    folderpath = os.getcwd()
+    if localpath:
+        if os.path.isdir(localpath) or localpath[-1] == os.sep:
+            folderpath = os.path.abspath(localpath)
+        else:
+            filename = os.path.basename(localpath)
+            folderpath = os.path.abspath(os.path.dirname(localpath))
+        try:
+            if not os.path.exists(folderpath): os.makedirs(folderpath)
+        except (IOError, OSError), e:
+            folderpath = os.getcwd()
             print e, "\nUsing working directory:", folderpath
-	return "%s%s%s" % (folderpath, os.sep, filename)
+    return "%s%s%s" % (folderpath, os.sep, filename)
+
+def rename_downloaded(path):
+    try:
+        os.rename(path+DL_EXT, path)
+    except (IOError, OSError), e:
+        print e
+        print "Error while renaming file. Renaming aborted."        
 
 def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
     #TODO: make templated output
@@ -69,19 +77,20 @@ def downloadfile(url, localpath=None):
     
     newPath = getNewPath(url, localpath)
     print "Saving to:", newPath
-    #TODO: add extension(.download) to downloading file
-    if os.path.exists(newPath): 
-        localLen = int(os.path.getsize(newPath))  
+    currentDlPath = newPath+DL_EXT
+    if os.path.exists(currentDlPath):
+        localLen = int(os.path.getsize(currentDlPath))
         if localLen == remoteLen:
             print "File has downloaded already.\n"
+            rename_downloaded(newPath)
             return
         mode = APPENDMODE
-    else: 
+    else:
         localLen = 0
         mode = REWRITEMODE
 
     try:
-        localFile = open(newPath, mode)    
+        localFile = open(currentDlPath, mode)    
     except (IOError, OSError), e:
         print e
         print "Download aborted.\n"
@@ -105,5 +114,6 @@ def downloadfile(url, localpath=None):
         localFile.write(line)
     remoteFile.close()
     localFile.close()
+    rename_downloaded(newPath)
     print "\nFile [%s] has been downloaded.\n" % newPath
     return
