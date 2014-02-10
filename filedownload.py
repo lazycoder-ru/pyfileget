@@ -8,18 +8,18 @@ APPENDMODE = "ab"
 REWRITEMODE = "wb"
 DL_EXT = ".download"
 
-def getConsoleWidth():
+def get_console_width():
     columns = 80 #for windows and others
     if platform.system() == "Linux":
         columns = os.popen('stty size', 'r').read().split()[1]
     return int(columns)
     
-def getLoadingBar(ln, percent=100, bracket="[]", fillch="#", emptych="-"):
-    sumln = ln-2 #2 brackets
-    filled = int(percent*sumln/100)
-    return "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(sumln-filled), bracket[1])
+def get_loading_bar(totalLen, percent=100, bracket="[]", fillch="#", emptych="-"):
+    barLen = totalLen-2 #2 brackets
+    filled = int(percent*barLen/100)
+    return "%s%s%s%s" % (bracket[0], fillch*filled, emptych*(barLen-filled), bracket[1])
 
-def getNewPath(url, localpath=None):
+def get_new_path(url, localpath=None):
     filename = url.split("/")[-1]
     folderpath = os.getcwd()
     if localpath:
@@ -42,7 +42,7 @@ def rename_downloaded(path):
         print e
         print "Error while renaming file. Renaming aborted."        
 
-def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
+def display_download_info(bytesRead, remoteLen, speed, conWidth):
     #TODO: make templated output
     percent = 100*bytesRead/remoteLen
     curInfo = "\rProgress: %.02f/%.02f KB (%d%%) %s" % (
@@ -50,12 +50,12 @@ def displayDownloadInfo(bytesRead, remoteLen, speed, conWidth):
         remoteLen/1024.0,
         percent,
         speed)
-    loadbar = getLoadingBar(conWidth-len(curInfo), percent)
+    loadbar = get_loading_bar(conWidth-len(curInfo), percent)
     curInfo = curInfo[:11] + loadbar + curInfo[10:] #after progress
     sys.stdout.write(curInfo)
     sys.stdout.flush()    
 
-def downloadfile(url, localpath=None):
+def download_file(url, localpath=None):
     print "Sending request..."
     try:
         res = urllib2.urlopen(url)
@@ -75,7 +75,7 @@ def downloadfile(url, localpath=None):
         remoteLen/1024.0/1024.0,
         res.info().getheader("Content-Type"))
     
-    newPath = getNewPath(url, localpath)
+    newPath = get_new_path(url, localpath)
     print "Saving to:", newPath
     currentDlPath = newPath+DL_EXT
     if os.path.exists(currentDlPath):
@@ -104,13 +104,13 @@ def downloadfile(url, localpath=None):
         print e
         return
         
-    cols = getConsoleWidth()
+    cols = get_console_width()
     print "Downloading:", remoteFile.url
     bytesRead = float(localLen)
     speed = NetSpeed(bytesRead)
     for line in remoteFile:
         bytesRead += len(line)
-        displayDownloadInfo(bytesRead, remoteLen, speed.get_speed(bytesRead), cols)
+        display_download_info(bytesRead, remoteLen, speed.get_speed(bytesRead), cols)
         localFile.write(line)
     remoteFile.close()
     localFile.close()

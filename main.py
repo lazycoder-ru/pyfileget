@@ -4,11 +4,11 @@
 # Just for test file download module
 
 import os
-from filedownload import downloadfile
+from filedownload import download_file
 
 def main():
 	home = os.path.expanduser("~")
-	downloadfile("http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso", home)
+	download_file("http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso", home)
 	
 	return 0
 
