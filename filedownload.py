@@ -3,6 +3,7 @@
 
 import os,sys,urllib2,platform,time
 from pynetspeed import NetSpeed
+from downloaderror import DownloadError
 
 DL_EXT = ".download"
 
@@ -40,7 +41,7 @@ def rename_downloaded(path):
         print e
         print "Error while renaming file. Renaming aborted."        
 
-def display_download_info(bytesRead, remoteLen, speed, conWidth):
+def display_download_info(bytesRead=1, remoteLen=1, speed="", conWidth=80):
     #TODO: make templated output
     percent = 100*bytesRead/remoteLen
     curInfo = "\rProgress: %.02f/%.02f KB (%d%%) %s" % (
@@ -53,19 +54,20 @@ def display_download_info(bytesRead, remoteLen, speed, conWidth):
     sys.stdout.write(curInfo)
     sys.stdout.flush()    
 
-def download(remoteFile, localFile, bytesReaded, remoteLen):
-    #TODO: add try except
+def download(remoteFile, localFile, remoteLen, bytesReaded):
     cols = get_console_width()
     speed = NetSpeed(bytesReaded)
+    print "Downloading:", remoteFile.url
     try:
         for line in remoteFile:
             bytesReaded += len(line)
             display_download_info(bytesReaded, remoteLen, speed.get_speed(bytesReaded), cols)
             localFile.write(line)
+    except (OSError, urllib2.HTTPError, urllib2.URLError), e:
+        raise DownloadError(systemErrorValue=e)
     finally:
         remoteFile.close()
         localFile.close()
-    rename_downloaded(newPath) 
 
 def get_remote_file_info(url):
     try:
@@ -73,14 +75,11 @@ def get_remote_file_info(url):
         fileLen = int(reply.info().getheader("Content-Length"))
         code = reply.getcode()
         fileType = reply.info().getheader("Content-Type")
-    except (urllib2.HTTPError, urllib2.URLError), e:
-        print e
-        print "Download aborted.\n"
-        return None
+    except (urllib2.HTTPError, urllib2.URLError, ValueError), e:
+        raise DownloadError("", e)
     except TypeError:
         #TODO: make ability to download web pages (they have None in Length)
-        print "Content-Length is None. Nothing to download.\n"
-        return None
+        raise DownloadError("Content-Length is None.")
     return fileLen, code, fileType
 
 def get_local_file_length(path):
@@ -90,55 +89,48 @@ def get_local_file_length(path):
     else:
         return 0
     
-def get_remote_file_handle(url, bytesOffset=0):
+def get_remote_file_handler(url, bytesOffset=0):
     req = urllib2.Request(url)
     req.headers['Range'] = 'bytes='+str(bytesOffset)+'-'
     try:
         fileObj = urllib2.urlopen(req)
     except (urllib2.HTTPError, urllib2.URLError), e:
-        print e
-        return None
+        raise DownloadError("Cant open remote file", e)
     return fileObj
         
-def get_local_file_handle(path):
+def get_local_file_handler(path):
     try:
         fileObj = open(path+DL_EXT, "ab")    
     except (IOError, OSError), e:
-        print e
-        print "Download aborted.\n"
-        return None
+        raise DownloadError("Cant open local file:"+path+DL_ext,e)
     return fileObj
 
 def download_file(url, localpath=None):
     #requesting file and getting info of remote file
     print "Sending request..."
     remoteLen, returnCode, remoteType = get_remote_file_info(url)
-    if not remoteLen: return
     #print info
     print "Received code:", returnCode
-    print "Length: %d (%.02fM) [%s]" % (
-        remoteLen,
-        remoteLen/1024.0/1024.0,
-        remoteType)
+    print "Length: %d (%.02fM) [%s]" % (remoteLen, remoteLen/1024.0/1024.0, remoteType)
     #getting local path
     newPath = get_new_path(url, localpath)
     print "Saving to:", newPath
     if os.path.exists(newPath):
-        print "File exists. Download aborted.\n"
-        return
+        raise DownloadError("File %s exists." % newPath)
     localLen = get_local_file_length(newPath)
     if localLen == remoteLen:
-        print "File has downloaded already.\n"
         rename_downloaded(newPath)
-        return
-    #getting local file handle
-    localFile = get_local_file_handle(newPath)
-    if not localFile: return
-    #getting remote file handle
-    remoteFile = get_remote_file_handle(url, localLen)
-    if not remoteFile: return
-    #downloading
-    print "Downloading:", remoteFile.url
-    download(remoteFile, localFile, float(localLen), float(remoteLen))
-    print "\nFile [%s] has been downloaded.\n" % newPath
-    return
+        raise DownloadError("File %s has downloaded already." % newPath)
+    download(get_remote_file_handler(url, localLen),
+             get_local_file_handler(newPath),
+             float(remoteLen), float(localLen))
+    rename_downloaded(newPath)
+    return newPath
+
+def pyget(url, localpath):
+    try:
+        newPath = download_file(url, localpath)
+    except DownloadError, e:
+        print e, "Download aborted.\n"
+    else:
+        print "\nFile [%s] has been downloaded.\n" % newPath
