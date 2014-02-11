@@ -1,17 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
-import os,sys,urllib2,platform,time
+import os,sys,urllib2,time
 from pynetspeed import NetSpeed
 from downloaderror import DownloadError
 
-DL_EXT = ".download"
+DL_EXT = ".pyflget"
 
 def get_console_width():
-    columns = 80 #for windows and others
-    if platform.system() == "Linux":
-        columns = os.popen('stty size', 'r').read().split()[1]
-    return int(columns)
+    try:
+        columns = int(os.popen('stty size', 'r').read().split()[1])
+    except:
+        columns = 40 #for windows and others
+    return columns
     
 def get_loading_bar(totalLen, percent=100, bracket="[]", fillch="#", emptych="-"):
     barLen = totalLen-2 #2 brackets
@@ -94,7 +95,7 @@ def get_remote_file_handle(url, bytesOffset=0):
     try:
         fileObj = urllib2.urlopen(req)
     except (urllib2.HTTPError, urllib2.URLError), e:
-        raise DownloadError("Cant open remote file", e)
+        raise DownloadError("Cant open remote file:"+fileObj.url, e)
     return fileObj
         
 def get_local_file_handle(path):
@@ -120,7 +121,7 @@ def download_starter(url, localpath=None):
         raise DownloadError("File %s has downloaded already." % newPath)
     print "Downloading:", url #maybe need to use remoteFile.url
     download_process(get_remote_file_handle(url, localLen),
-    get_local_file_handle(newPath), float(remoteLen), float(localLen))
+        get_local_file_handle(newPath), float(remoteLen), float(localLen))
     rename_downloaded(newPath)
     return newPath
 
