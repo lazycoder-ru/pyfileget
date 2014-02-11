@@ -4,11 +4,11 @@
 # Just for test file download module
 
 import os
-from filedownload import pyget
+from filedownload import pyflget
 
 def main():
 	home = os.path.expanduser("~")
-	pyget("http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso", home)
+	pyflget("http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso", home)
 	#http://mirror.yandex.ru/ubuntu-releases/13.10/ubuntu-13.10-desktop-i386.iso
 	
 	return 0

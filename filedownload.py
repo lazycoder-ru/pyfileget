@@ -54,7 +54,7 @@ def display_download_info(bytesRead=1, remoteLen=1, speed="", conWidth=80):
     sys.stdout.write(curInfo)
     sys.stdout.flush()    
 
-def download(remoteFile, localFile, remoteLen, bytesReaded):
+def download_process(remoteFile, localFile, remoteLen, bytesReaded):
     cols = get_console_width()
     speed = NetSpeed(bytesReaded)
     try:
@@ -88,7 +88,7 @@ def get_local_file_length(path):
     else:
         return 0
     
-def get_remote_file_handler(url, bytesOffset=0):
+def get_remote_file_handle(url, bytesOffset=0):
     req = urllib2.Request(url)
     req.headers['Range'] = 'bytes='+str(bytesOffset)+'-'
     try:
@@ -97,14 +97,14 @@ def get_remote_file_handler(url, bytesOffset=0):
         raise DownloadError("Cant open remote file", e)
     return fileObj
         
-def get_local_file_handler(path):
+def get_local_file_handle(path):
     try:
         fileObj = open(path+DL_EXT, "ab")    
     except (IOError, OSError), e:
         raise DownloadError("Cant open local file:"+path+DL_ext,e)
     return fileObj
 
-def download_file(url, localpath=None):
+def download_starter(url, localpath=None):
     #requesting file and getting info of remote file
     print "Sending request..."
     remoteLen, returnCode, remoteType = get_remote_file_info(url)
@@ -118,16 +118,15 @@ def download_file(url, localpath=None):
     if localLen == remoteLen:
         rename_downloaded(newPath)
         raise DownloadError("File %s has downloaded already." % newPath)
-    print "Downloading:", url    
-    download(get_remote_file_handler(url, localLen),
-             get_local_file_handler(newPath),
-             float(remoteLen), float(localLen))
+    print "Downloading:", url #maybe need to use remoteFile.url
+    download_process(get_remote_file_handle(url, localLen),
+    get_local_file_handle(newPath), float(remoteLen), float(localLen))
     rename_downloaded(newPath)
     return newPath
 
-def pyget(url, localpath=None):
+def pyflget(url, localpath=None):
     try:
-        newPath = download_file(url, localpath)
+        newPath = download_starter(url, localpath)
     except DownloadError, e:
         print e, "Download aborted.\n"
     else:
