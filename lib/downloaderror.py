@@ -1,11 +1,17 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Simple user-exceptions class for download problems.
+# 3nd argument in constructor is for system exceptions text that may
+# caused by downloading process.  
+
 
 class DownloadError(Exception):
-    def __init__(self, value, systemErrorValue=""):
-        self.systemErrorValue = systemErrorValue
+    def __init__(self, value, sysErrorValue=None):
+        self.sysErrorValue = sysErrorValue
         self.value = value
 
     def __str__(self):
-        return str(self.systemErrorValue) + " " + str(self.value)
+        if self.sysErrorValue:
+            return str(self.sysErrorValue) + " " + str(self.value)
+        return str(self.value)
 
