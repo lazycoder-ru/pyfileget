@@ -128,7 +128,7 @@ def download_starter(url, localpath=None):
     rename_downloaded(newPath)
     return newPath
 
-def pyflget(url, localpath=None):
+def download(url, localpath=None):
     try:
         newPath = download_starter(url, localpath)
     except DownloadError, e:
