@@ -1,4 +1,6 @@
-py-file-get
+python-file-get
 ===========
 
-Simple one-stream download module with progress bar and speed meter
+Simple file download module with progress bar and speed meter.
+
+Author: Dmitriy Kalinin (dem.mort@gmail.com)
