@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*- 
 
 import os,sys,urllib2,time
-from pynetspeed import NetSpeed
-from downloaderror import DownloadError
+from lib.pynetspeed import NetSpeed
+from lib.downloaderror import DownloadError
 
 DL_EXT = ".pyflget"
 
