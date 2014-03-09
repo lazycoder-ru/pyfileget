@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 
-import os,sys,urllib2,time
+import os,sys,urllib,urllib2,time
 from lib.pynetspeed import NetSpeed
 from lib.downloaderror import DownloadError
 
