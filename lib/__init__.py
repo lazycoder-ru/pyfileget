@@ -1,0 +1,2 @@
+from downloaderror import DownloadError
+from pynetspeed import NetSpeed

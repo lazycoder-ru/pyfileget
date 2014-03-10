@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*- 
 
 import os,sys,urllib,urllib2,time
-from lib.pynetspeed import NetSpeed
-from lib.downloaderror import DownloadError
+from lib import NetSpeed, DownloadError
 
 DL_EXT = ".pyflget"
 
@@ -106,7 +105,7 @@ def get_local_file_handle(path):
         raise DownloadError("Cant open local file:"+path+DL_ext,e)
     return fileObj
 
-def download_starter(url, localpath=None):
+def download(url, localpath=None):
     #requesting file and getting info of remote file
     print "Sending request..."
     remoteLen, returnCode, remoteType = get_remote_file_info(url)
@@ -127,11 +126,3 @@ def download_starter(url, localpath=None):
         get_local_file_handle(newPath), float(remoteLen), float(localLen))
     rename_downloaded(newPath)
     return newPath
-
-def download(url, localpath=None):
-    try:
-        newPath = download_starter(url, localpath)
-    except DownloadError, e:
-        print e, "Download aborted.\n"
-    else:
-        print "\nFile [%s] has been downloaded.\n" % newPath
