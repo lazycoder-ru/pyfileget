@@ -11,6 +11,8 @@ class NetSpeed(object):
 
     def __init__(self, bytesReaded, measure="KB"):
         self.bytesReaded = bytesReaded
+        if not measure in self.measures.keys():
+            measure = "KB"
         self.measure = measure
         self.startTime = time()
 
@@ -19,4 +21,4 @@ class NetSpeed(object):
             self.startTime = time()
             self.speed = (bytesReaded-self.bytesReaded)/self.measures[self.measure]
             self.bytesReaded = bytesReaded
-        return "%.02f %s" % (self.speed, self.measure+"/s")
+        return "%.02f %s/s" % (self.speed, self.measure)

@@ -12,6 +12,6 @@ class DownloadError(Exception):
 
     def __str__(self):
         if self.sysErrorValue:
-            return str(self.sysErrorValue) + " " + str(self.value)
-        return str(self.value)
+            return str(self.sysErrorValue) + " " + self.value.encode("utf-8")
+        return self.value.encode("utf-8")
 
