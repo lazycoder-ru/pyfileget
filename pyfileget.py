@@ -63,7 +63,7 @@ def download_process(remoteFile, localFile, remoteLen, bytesReaded):
         for line in remoteFile:
             bytesReaded += len(line)
             display_download_info(bytesReaded, remoteLen, speed.get_speed(bytesReaded), cols)
-            localFile.write(line)
+    localFile.write(line)
     except (OSError, urllib2.HTTPError, urllib2.URLError), e:
         raise DownloadError(sysErrorValue=e)
     finally:

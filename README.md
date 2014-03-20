@@ -1,7 +1,7 @@
 #### pyfileget v0.2.1dev - simple console download module
 **Language:** Python
 
-**Features:** continue downloading, statusbar, speedmetre, safe(local files will not be overwritten)
+**Features:** continue downloading, statusbar, speedmeter, safe(local files will not be overwritten)
 
 **Description:** Simple file download module for using in your scripts with console output. Pyfileget uses only standart python2 libs(urllib and urllib2 for connections and downloading). 
 
