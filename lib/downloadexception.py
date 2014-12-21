@@ -5,7 +5,7 @@
 # caused by downloading process.  
 
 
-class DownloadError(Exception):
+class DownloadException(Exception):
     def __init__(self, value, sysErrorValue=None):
         self.sysErrorValue = sysErrorValue
         self.value = value

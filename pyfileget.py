@@ -1,16 +1,24 @@
 # -*- coding: utf-8 -*- 
 
-import os,sys,urllib,urllib2,time
-from lib import NetSpeed, DownloadError
+import os,sys,urllib,urllib2
+from lib import NetSpeed, DownloadException
 
 DL_EXT = ".pyflget"
+
+def determine_encoding():
+    reload(sys)
+    if os.name == "nt":
+        sys.setdefaultencoding('cp866')
+    else:
+        sys.setdefaultencoding('utf-8')
+
 
 #returns width of current console
 def get_console_width():
     try:
         columns = int(os.popen('stty size', 'r').read().split()[1])
     except:
-        columns = 40 #for windows and others
+        columns = 80 #for windows and others
     return columns
 
 #returns loading bar
@@ -32,21 +40,23 @@ def get_new_path(url, localpath=None):
         try:
             if not os.path.exists(folderpath): os.makedirs(folderpath)
         except (IOError, OSError), e:
-            raise DownloadError("Cant create folder(s).",e)
+            raise DownloadException("Cant create folder(s).",e)
     return "%s%s%s" % (folderpath, os.sep, filename)
 
 #renames downloaded file by removing .pyflget extension
 def rename_downloaded(path):
-    if os.path.exists(path): raise DownloadError("File %s exists." % path)    
+    if os.path.exists(path): raise DownloadException("File %s exists." % path)    
     try:
         os.rename(path+DL_EXT, urllib.unquote(path))
     except (IOError, OSError), e:
-        raise DownloadError("Error while renaming file.", e)
+        raise DownloadException("Error while renaming file.", e)
 
 def display_download_info(passed=1, total=1, speed="", conWidth=80):
     #TODO: make templated output
     percent = 100*passed/total
-    curInfo = "\rProgress: %.02f/%.02f KB (%d%%) %s" % (
+    ln = len("%.2f" % (total/1024.0))
+    curInfo = "\rProgress: %" + str(ln) + ".02f/%.02f KB (%003d%%) %13s"
+    curInfo = curInfo % (
         passed/1024.0,
         total/1024.0,
         percent,
@@ -54,7 +64,7 @@ def display_download_info(passed=1, total=1, speed="", conWidth=80):
     loadbar = get_loading_bar(conWidth-len(curInfo), percent)
     curInfo = curInfo[:11] + loadbar + curInfo[10:] #after progress
     sys.stdout.write(curInfo)
-    sys.stdout.flush()    
+    sys.stdout.flush()
 
 def download_process(remoteFile, localFile, remoteLen, bytesReaded):
     cols = get_console_width()
@@ -65,7 +75,7 @@ def download_process(remoteFile, localFile, remoteLen, bytesReaded):
             display_download_info(bytesReaded, remoteLen, speed.get_speed(bytesReaded), cols)
             localFile.write(line)
     except (OSError, urllib2.HTTPError, urllib2.URLError), e:
-        raise DownloadError(sysErrorValue=e)
+        raise DownloadException(sysErrorValue=e)
     finally:
         remoteFile.close()
         localFile.close()
@@ -77,14 +87,14 @@ def get_remote_file_info(url):
         code = reply.getcode()
         fileType = reply.info().getheader("Content-Type")
     except (urllib2.HTTPError, urllib2.URLError, ValueError), e:
-        raise DownloadError("", e)
+        raise DownloadException("", e)
     except TypeError:
         #TODO: make ability to download web pages (they have None in Length)
-        raise DownloadError("Content-Length is None.")
+        raise DownloadException("Content-Length is None.")
     return fileLen, code, fileType
 
 def get_local_file_length(path):
-    if os.path.exists(path): raise DownloadError("File %s exists." % path)
+    if os.path.exists(path): raise DownloadException("File %s exists." % path)
     #TODO: actions for renaming downloading file or something
     if os.path.exists(path+DL_EXT): return os.path.getsize(path+DL_EXT)
     return 0
@@ -95,31 +105,35 @@ def get_remote_file_handle(url, bytesOffset=0):
     try:
         fileObj = urllib2.urlopen(req)
     except (urllib2.HTTPError, urllib2.URLError), e:
-        raise DownloadError("Cant open remote file:"+fileObj.url, e)
+        raise DownloadException("Cant open remote file:"+fileObj.url, e)
     return fileObj
         
 def get_local_file_handle(path):
     try:
         fileObj = open(path+DL_EXT, "ab")    
     except (IOError, OSError), e:
-        raise DownloadError("Cant open local file:"+path+DL_ext,e)
+        raise DownloadException("Cant open local file:"+path+DL_EXT,e)
     return fileObj
 
+def log(text, stream=sys.stdout):
+    pass
+
 def download(url, localpath=None):
+    determine_encoding()
     #requesting file and getting info of remote file
     print "Sending request..."
     remoteLen, returnCode, remoteType = get_remote_file_info(url)
-    #print info
     print "Received code:", returnCode
     print "Length: %d (%.02fM) [%s]" % (remoteLen, remoteLen/1024.0/1024.0, remoteType)
     #getting local path
     newPath = get_new_path(url, localpath)
+    print url
     print "Saving to:", newPath
     #getting length of localfile
     localLen = get_local_file_length(newPath)
     if localLen == remoteLen:
         rename_downloaded(newPath)
-        raise DownloadError("File %s has downloaded already." % newPath)
+        raise DownloadException("File %s has downloaded already." % newPath)
     print "Downloading:", url #maybe need to use remoteFile.url
     #actual process itself
     download_process(get_remote_file_handle(url, localLen),

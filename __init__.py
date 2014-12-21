@@ -1,2 +1,2 @@
 from pyfileget import download
-from lib import DownloadError
+from lib import DownloadException
